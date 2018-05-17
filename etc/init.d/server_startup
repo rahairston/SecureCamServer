@@ -7,6 +7,6 @@
 # Default-Stop: 0 1 6
 ### END INIT INFO
 
-cd /home/pi/Server
+cd /home/pi/SecureCamServer
 python /home/pi/SecureCamServer/autorun.py &
 cd /etc/init.d
