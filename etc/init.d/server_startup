@@ -8,5 +8,5 @@
 ### END INIT INFO
 
 cd /home/pi/Server
-python /home/pi/Server/autorun.py &
+python /home/pi/SecureCamServer/autorun.py &
 cd /etc/init.d
