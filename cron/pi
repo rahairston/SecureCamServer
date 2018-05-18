@@ -1,3 +1,0 @@
-1 0 * * * sudo sh /home/pi/Pictures/camera/makedir.sh
-2 0 * * * sudo sh /home/pi/Pictures/camera/removedir.sh
-30 * * * * python /home/pi/Documents/Projects/verify.py

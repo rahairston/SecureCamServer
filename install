@@ -1,5 +1,30 @@
 #!/bin/sh
 echo "INSTALLING..."
-echo "Making directories"
-mkdir $HOME/Pictures/Camera
 
+
+STARTUPDIR="/etc/init.d/"
+STARTUP="/etc/init.d/camera_autostart"
+
+if [ ! -d $STARTUPDIR ]; then
+    echo "Making startup directory \"init.d\" in /etc"
+    mkdir $STARTUPDIR
+fi
+
+if [ ! -f $STARTUP ]; then
+    echo "Making startup script in /etc/init.d"
+
+    #Adding the lines to the startup script
+    touch $STARTUP
+    echo "#!/bin/sh" >> $STARTUP
+    echo "### BEGIN INIT INFO" >> $STARTUP
+    echo "# Provides: SecurityCam" >> $STARTUP
+    echo "# Required-Start: \$local_fs \$network" >> $STARTUP
+    echo "# Required-Stop: \$local_fs" >> $STARTUP
+    echo "# Default-Start: 2 3 4 5" >> $STARTUP
+    echo "# Default-Stop: 0 1 6" >> $STARTUP
+    echo "### END INIT INFO" >> $STARTUP
+    echo "" >> $STARTUP
+    echo "cd $PWD" >> $STARTUP
+    echo "npm run start &" >> $STARTUP
+    echo "cd /etc/init.d" >> $STARTUP
+fi
