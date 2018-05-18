@@ -10,4 +10,10 @@ module.exports = function(app) {
 
   app.route('/off')
     .post(camera.turnOff);
+
+  app.route('/pictures')
+    .get(camera.getPictures);
+
+  app.route('/notify')
+    .get(camera.notifications);
 };
