@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "INSTALLING..."
+echo "Making directories"
+mkdir $HOME/Pictures/Camera
+

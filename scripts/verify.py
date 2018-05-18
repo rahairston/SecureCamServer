@@ -1,12 +1,18 @@
 import os
 import re
-
+'''
+for raspberry pi, this will be using python 2,
+which is instaled by default, therefore, we will
+not change 'python' to say python2
+'''
 from subprocess import check_output
 def get_pid(name):
     return check_output(["pidof",name])
 
-if os.path.isfile('/home/pi/Documents/Projects/file.txt') :
-    f = open('/home/pi/Documents/Projects/file.txt', 'r')
+cwd = os.getcwd()
+print cwd
+if os.path.isfile(cwd + '/file.txt') :
+    f = open(cwd + '/file.txt', 'r')
 
     isAlive = f.read()
 
@@ -25,4 +31,4 @@ if os.path.isfile('/home/pi/Documents/Projects/file.txt') :
             
     #if there is no pid matching file pid, remove file
     f.close()
-    os.remove('/home/pi/Documents/Projects/file.txt')
+    os.remove(cwd + '/file.txt')
