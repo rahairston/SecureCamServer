@@ -14,6 +14,12 @@ module.exports = function(app) {
   app.route('/pictures')
     .get(camera.getPictures);
 
+  app.route('/remove')
+    .delete(camera.deletePictures);
+
   app.route('/notify')
     .get(camera.notifications);
+
+  app.route('/password')
+    .post(camera.newPassword);
 };

@@ -5,7 +5,7 @@ for raspberry pi, this will be using python 2,
 which is instaled by default, therefore, we will
 not change 'python' to say python2
 This file may be unecessary seeing as noeJS is
-better about things than python
+better about this project than python
 '''
 from subprocess import check_output
 def get_pid(name):

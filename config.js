@@ -1,2 +1,2 @@
 'use strict'
-exports.password='Champ'
+exports.password='1b4d976c2ad7d01d6c947f5bea4240cf7f612c9f21787229854cfaf9dad6f147'
