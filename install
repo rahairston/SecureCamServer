@@ -1,6 +1,9 @@
 #!/bin/sh
 echo "INSTALLING..."
 
+echo "Making Pictures Folder"
+mkdir Pictures
+
 STARTUPDIR="/etc/init.d/"
 STARTUP="/etc/init.d/camera_autostart"
 
