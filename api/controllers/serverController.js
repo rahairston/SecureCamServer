@@ -1,11 +1,15 @@
 'use strict';
 var fs = require('fs'); //file-system handling
 const { exec } = require('child_process'); //running the matlab algorithm
-const path = require('path'); //OS independent pathing
+const path = require('path'); //OS independent pathing... not that it matters snce we're on a pi
 var configPath = path.join(process.cwd(),'config');
 const password = require(configPath);
 
 exports.turnOn = function(req, res) {
+  if (req.body.password !== password.password) {
+    res.send('Incorrect Password');
+    return;
+  }
   var today = new Date();
   var dateString = `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`;
   var folder = path.join(process.cwd(), 'Pictures', dateString);
@@ -20,22 +24,31 @@ exports.turnOn = function(req, res) {
     fs.mkdirSync(session);
   }
 
-  console.log(folder);
-
-  exec(`python ${process.cwd()}/scripts/sensor.py ${folder} &`, (err, stdout, stderr) => {
+  exec(`python ${process.cwd()}/scripts/sensor.py ${folder}/ ${session}/ &`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return;
     }
-
-    console.log(stderr);
   });
 
   res.send('hi');
 };
 
 exports.turnOff = function(req, res) {
-  res.send('hi');
+  //file with the pid of our infinite loop
+  var file = path.join(process.cwd(), 'Scripts', 'file.txt')
+
+  var pid = fs.readFileSync(file)
+  if (pid !== undefined || pid !== null) {
+    exec(`kill ${pid} && rm ${file}`, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    });
+  }
+
+  res.send('complete');
 };
 
 exports.getPictures = function(req, res) {

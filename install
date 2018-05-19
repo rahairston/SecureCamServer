@@ -1,7 +1,6 @@
 #!/bin/sh
 echo "INSTALLING..."
 
-
 STARTUPDIR="/etc/init.d/"
 STARTUP="/etc/init.d/camera_autostart"
 
@@ -28,3 +27,6 @@ if [ ! -f $STARTUP ]; then
     echo "npm run start &" >> $STARTUP
     echo "cd /etc/init.d" >> $STARTUP
 fi
+
+echo "installing npm dependencies"
+npm i
