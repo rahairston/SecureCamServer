@@ -91,7 +91,9 @@ exports.turnOff = function(req, res) {
  * Gets an individual picture by name
  * Will be recieved in headers as FOLDER/'img'.jpg
  * This exists because NodeJS isn't good at 
- * sending multiple files at a time (maybe switch to zip?)
+ * sending multiple files at a time 
+ * FUTURE PLANS
+ * maybe switch to zip and request folder/send a folder at a time?
  * @param {*} req 
  * @param {*} res 
  */
