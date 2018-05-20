@@ -77,7 +77,7 @@ exports.turnOff = function(req, res) {
   var sessionPath = path.join(process.cwd(), 'Pictures', 'Session');
 
   //removing the session folder and it's contents
-  exec(`rm -rf ${sessionPath}/`, (err, stdout, stderr) => {
+  exec(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return;
