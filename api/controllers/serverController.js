@@ -9,9 +9,25 @@ const password = require(configPath);
 const HTTP_SUCCESS = 200
 const HTTP_UNAUTHORIZED = 401
 
+function getFolders(picturePath, folders) {
+  return new Promise(function(resolve, reject) {
+    var arr = [];
+
+    for(var i in folders) {
+      var folder = folders[i];
+      var pictures = fs.readdirSync(path.join(picturePath, folder));
+      for(var j in pictures) {
+        arr.push(path.join(folder, pictures[j]));
+      }
+    }
+
+    resolve(arr);
+  });
+}
+
 exports.turnOn = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
   var today = new Date();
@@ -35,55 +51,101 @@ exports.turnOn = function(req, res) {
     }
   });
 
-  res.send(HTTP_SUCCESS);
+  res.sendStatus(HTTP_SUCCESS);
 };
 
 exports.turnOff = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
 
   //file with the pid of our infinite loop
   var file = path.join(process.cwd(), 'Scripts', 'file.txt')
 
-  var pid = fs.readFileSync(file)
-  if (pid !== undefined || pid !== null) {
-    exec(`kill ${pid} && rm ${file}`, (err, stdout, stderr) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
-  }
+  if (fs.existsSync(file)) {    
+    var pid = fs.readFileSync(file)
+    if (pid !== undefined || pid !== null) {
+      exec(`kill ${pid} && rm ${file}`, (err, stdout, stderr) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      });
+    }}
 
-  res.send(HTTP_SUCCESS);
+  var sessionPath = path.join(process.cwd(), 'Pictures', 'Session');
+
+  //removing the session folder and it's contents
+  exec(`rm -rf ${sessionPath}/`, (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  });
+
+  res.sendStatus(HTTP_SUCCESS);
 };
 
-exports.getPictures = function(req, res) {
+/**
+ * Gets an individual picture by name
+ * Will be recieved in headers as FOLDER/'img'.jpg
+ * This exists because NodeJS isn't good at 
+ * sending multiple files at a time (maybe switch to zip?)
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getPicture = function(req, res) {
   if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
+
+  var imgPath = path.join('Pictures', req.headers.picture)
+
+  res.sendFile(imgPath, {root: process.cwd()})
+}
+
+/**
+ * Returns list of pictures so we can individually GET them (above)
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getPictures = function(req, res) {
+  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
+    res.sendStatus(HTTP_UNAUTHORIZED);
+    return;
+  }
+
+  var picturePath = path.join(process.cwd(), 'Pictures')
+  var folders = fs.readdirSync(picturePath);
+
+  getFolders(picturePath, folders).then(function(array) {
+    var data = {
+      pictures: array
+    };
+    
+    res.send(data);
+  });
 };
 
 exports.deletePictures = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
 };
 
 exports.notifications = function(req, res) {
   if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
 };
 
 exports.newPassword = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.send(HTTP_UNAUTHORIZED);
+    res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
 
@@ -91,5 +153,5 @@ exports.newPassword = function(req, res) {
   var file = path.join(process.cwd(), 'config.js')
   fs.unlinkSync(file); //delete the file then overwrite it
   fs.appendFileSync(file, `'use strict'\nexports.password='${newPass}'`);
-  res.send(HTTP_SUCCESS)
+  res.sendStatus(HTTP_SUCCESS)
 }

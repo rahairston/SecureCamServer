@@ -11,6 +11,9 @@ module.exports = function(app) {
   app.route('/off')
     .post(camera.turnOff);
 
+  app.route('/picture')
+    .get(camera.getPicture);
+  
   app.route('/pictures')
     .get(camera.getPictures);
 

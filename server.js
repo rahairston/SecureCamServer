@@ -10,7 +10,6 @@ bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.raw({limit: '50mb'}));
 
 var routes = require(routePath); //importing route
 routes(app); //register the route
