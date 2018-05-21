@@ -4,18 +4,28 @@ const { exec } = require('child_process'); //running the matlab algorithm
 const path = require('path'); //OS independent pathing... not that it matters snce we're on a pi
 var crypto = require('crypto')
 var configPath = path.join(process.cwd(),'config');
+const picturesPath = path.join(process.cwd(), 'Pictures')
 const password = require(configPath);
 
-const HTTP_SUCCESS = 200
+//HTTP status codes (other than default 200)
+const HTTP_NO_CONTENT = 204
 const HTTP_UNAUTHORIZED = 401
+const HTTP_FILE_NOT_FOUND = 404
 
-function getFolders(picturePath, folders) {
+/**
+ * Promise function to return all folders
+ * and files in the Pictures folder as an
+ * array in the format 'folder/img'
+ * @param folders list of folders in the picturesPath folder
+ * @return Promise resolving an array of strings containing folders/files in the Pictures folder 
+ */
+function getFolders(folders) {
   return new Promise(function(resolve, reject) {
     var arr = [];
 
     for(var i in folders) {
       var folder = folders[i];
-      var pictures = fs.readdirSync(path.join(picturePath, folder));
+      var pictures = fs.readdirSync(path.join(picturesPath, folder));
       for(var j in pictures) {
         arr.push(path.join(folder, pictures[j]));
       }
@@ -25,25 +35,37 @@ function getFolders(picturePath, folders) {
   });
 }
 
+/**
+ * Turns on the camera by executing the python script
+ * that infinitely loops to look for motion that takes 
+ * pictures when motion is detected. Passes both daily
+ * AND session folders as parameters to the python script
+ * @param {*} req contains password
+ * @param {*} res 
+ * @return the daily and session folders
+ */
 exports.turnOn = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
     res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
+
   var today = new Date();
   var dateString = `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`;
-  var folder = path.join(process.cwd(), 'Pictures', dateString);
-  var session = path.join(process.cwd(), 'Pictures', 'Session');
+  var folder = path.join(picturesPath, dateString); //daily folder
+  var session = path.join(picturesPath, 'Session'); // session folder
 
   //make dialy folder if one doesn't exist
   if (!fs.existsSync(folder)) {
     fs.mkdirSync(folder);
   }
 
+  //always make a session folder (but still do a check because... uh...)
   if (!fs.existsSync(session)) {
     fs.mkdirSync(session);
   }
 
+  //execute the python script that contains the Pi pin reading
   exec(`python ${process.cwd()}/scripts/sensor.py ${folder}/ ${session}/ &`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
@@ -51,9 +73,25 @@ exports.turnOn = function(req, res) {
     }
   });
 
-  res.sendStatus(HTTP_SUCCESS);
+  var data = {
+    session: session,
+    folder: folder
+  };
+
+  res.send(data);
 };
 
+/**
+ * Turns off motion sensor by killing the process
+ * in which the infinite loops resides. The process
+ * id is in a file called file.txt which is created
+ * BY the python process (since it knows it's PID)
+ * This also removes the Session folder and all of it's
+ * contents since it is a copy of all pictures taken
+ * during the 'on' phase
+ * @param {*} req contains password
+ * @param {*} res 
+ */
 exports.turnOff = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
     res.sendStatus(HTTP_UNAUTHORIZED);
@@ -74,9 +112,9 @@ exports.turnOff = function(req, res) {
       });
     }}
 
-  var sessionPath = path.join(process.cwd(), 'Pictures', 'Session');
+  var sessionPath = path.join(picturesPath, 'Session');
 
-  //removing the session folder and it's contents
+  //removing the session folder and it's contents (if no session, then rm -rf does nothing)
   exec(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
@@ -84,7 +122,7 @@ exports.turnOff = function(req, res) {
     }
   });
 
-  res.sendStatus(HTTP_SUCCESS);
+  res.send('Successfully turned off');
 };
 
 /**
@@ -94,7 +132,7 @@ exports.turnOff = function(req, res) {
  * sending multiple files at a time 
  * FUTURE PLANS
  * maybe switch to zip and request folder/send a folder at a time?
- * @param {*} req 
+ * @param {*} req contains password AND picture to GET
  * @param {*} res 
  */
 exports.getPicture = function(req, res) {
@@ -103,15 +141,22 @@ exports.getPicture = function(req, res) {
     return;
   }
 
-  var imgPath = path.join('Pictures', req.headers.picture)
+  //Send file doesn't allow relative paths BUT still check just in case
+  if (!fs.existsSync(path.join(picturesPath, req.headers.picture)) || req.headers.picture.includes('..')) {
+    res.status(HTTP_FILE_NOT_FOUND).send('File not found')
+    return
+  }
 
-  res.sendFile(imgPath, {root: process.cwd()})
+  res.sendFile(req.headers.picture, {root: picturesPath})
 }
 
 /**
  * Returns list of pictures so we can individually GET them (above)
- * @param {*} req 
+ * Calls the getFolders promise function so we get all folders
+ * before we send them back.
+ * @param {*} req contains password
  * @param {*} res 
+ * @return list of folders and files in thos folders
  */
 exports.getPictures = function(req, res) {
   if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
@@ -119,10 +164,9 @@ exports.getPictures = function(req, res) {
     return;
   }
 
-  var picturePath = path.join(process.cwd(), 'Pictures')
   var folders = fs.readdirSync(picturePath);
 
-  getFolders(picturePath, folders).then(function(array) {
+  getFolders(folders).then(function(array) {
     var data = {
       pictures: array
     };
@@ -131,20 +175,66 @@ exports.getPictures = function(req, res) {
   });
 };
 
+/**
+ * Deletes the selected photo sent in
+ * req. Can only delete items in the
+ * Pictures sub-folders
+ * @param {*} req contains password AND picture to delete
+ * @param {*} res 
+ * @return 'Deleted' even if nothing was deleted
+ */
 exports.deletePictures = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
     res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
+
+  var imgPath = path.join(picturesPath, req.body.picture);
+
+  //Check if includes picture path to prevent removing files outside of Pictures
+  if (fs.existsSync(imgPath) && imgPath.includes(picturesPath)) {
+    fs.unlinkSync(imgPath);
+  }
+
+  res.send('Deleted')
 };
 
+/**
+ * This function will be queried by the app every
+ * x seconds AFTER the server is turned on to see
+ * if a picture has been taken (i.e. motion detector
+ * has been set off)
+ * @param {*} req password
+ * @param {*} res 
+ * @return verification if the motion detector has been tripped or not
+ */
 exports.notifications = function(req, res) {
   if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
     res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   }
+
+  var sessionPath = path.join(picturesPath, 'Session');
+
+  if (fs.existsSync(sessionPath)) {
+    var array = fs.readdirSync(sessionPath)
+
+    if (array === undefined || array.length === 0) {
+      res.send('No')
+    } else {
+      res.send('Yes')
+    }
+  } else {
+    res.send('Camera is off')
+  }
 };
 
+/**
+ * Changing password for the server to turn on
+ * Changes the hash in the config file as well
+ * @param {*} req contains old and new passwords
+ * @param {*} res 
+ */
 exports.newPassword = function(req, res) {
   if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
     res.sendStatus(HTTP_UNAUTHORIZED);
@@ -155,5 +245,5 @@ exports.newPassword = function(req, res) {
   var file = path.join(process.cwd(), 'config.js')
   fs.unlinkSync(file); //delete the file then overwrite it
   fs.appendFileSync(file, `'use strict'\nexports.password='${newPass}'`);
-  res.sendStatus(HTTP_SUCCESS)
+  res.sendStatus(HTTP_NO_CONTENT)
 }
