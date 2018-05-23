@@ -60,13 +60,19 @@ exports.turnOn = function(req, res) {
     fs.mkdirSync(folder);
   }
 
-  //always make a session folder (but still do a check because... uh...)
+  /* always make a session folder (but still do a check because... uh...)
+   * session folder is each time the camera is turned on, that way
+   * We can distinguish from old photos. On client we will NOT do double
+   * requests. We will just do a duaity check there (i.e., if session, don't request,
+   * but if the requested picture from the date folde ris a session, we'll put it under
+   * the session section) -- note for when working on client)
+   */
   if (!fs.existsSync(session)) {
     fs.mkdirSync(session);
   }
 
   //execute the python script that contains the Pi pin reading
-  exec(`python ${process.cwd()}/scripts/sensor.py ${folder}/ ${session}/ &`, (err, stdout, stderr) => {
+  exec(`python ${process.cwd()}/Scripts/sensor.py ${folder}/ ${session}/ &`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return;
@@ -104,14 +110,16 @@ exports.turnOff = function(req, res) {
   if (fs.existsSync(file)) {    
     var pid = fs.readFileSync(file)
     if (pid !== undefined || pid !== null) {
-      exec(`kill ${pid} && rm ${file}`, (err, stdout, stderr) => {
+      exec(`kill ${pid}`, (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
         }
       });
-    }}
+    }
 
+    fs.unlinkSync(file);
+  }
   var sessionPath = path.join(picturesPath, 'Session');
 
   //removing the session folder and it's contents (if no session, then rm -rf does nothing)
@@ -246,4 +254,16 @@ exports.newPassword = function(req, res) {
   fs.unlinkSync(file); //delete the file then overwrite it
   fs.appendFileSync(file, `'use strict'\nexports.password='${newPass}'`);
   res.sendStatus(HTTP_NO_CONTENT)
+}
+
+/**
+ * Used for a login-style screen on client. That
+ * way we can get the password before any other calls.
+ * This also let's us store the password on the client
+ * and attach it to all future calls
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.verifyPassword = function(req, res) {
+
 }

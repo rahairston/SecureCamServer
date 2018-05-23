@@ -28,7 +28,7 @@ if os.path.isfile(cwd + '/file.txt') :
             arr = re.split(' ', string)
             if len(arr) < 3 :
                 os.system('kill ' + isAlive)
-            else : #if there is the main process AND subprocess, then we do nothing
+            else : #if there is the main process (server) AND subprocess (sensor), then we do nothing
                 exit()
             
     #if there is no pid matching file pid, remove file

@@ -2,6 +2,7 @@
 echo "INSTALLING..."
 
 echo "Making Pictures Folder"
+echo ""
 mkdir Pictures
 
 STARTUPDIR="/etc/init.d/"
@@ -9,11 +10,13 @@ STARTUP="/etc/init.d/camera_autostart"
 
 if [ ! -d $STARTUPDIR ]; then
     echo "Making startup directory \"init.d\" in /etc"
+    echo ""
     mkdir $STARTUPDIR
 fi
 
 if [ ! -f $STARTUP ]; then
     echo "Making startup script in /etc/init.d"
+    echo ""
 
     #Adding the lines to the startup script
     touch $STARTUP
@@ -31,5 +34,17 @@ if [ ! -f $STARTUP ]; then
     echo "cd /etc/init.d" >> $STARTUP
 fi
 
-echo "installing npm dependencies"
+echo "Installing picamera"
+echo ""
+#install picamera
+
+echo "installing npm and it's dependencies"
+echo ""
+apt-get install nodejs #verify with wifi
 npm i
+
+echo "The default password is 'password'"
+echo "You can change this with the '/password' route,"
+echo "Using the client application 'Change Password' functionality,"
+echo "or by running a sha256 hash on a password of your choice then copying into 'config.js'"
+echo ""

@@ -12,10 +12,13 @@ GPIO.setup(11,GPIO.IN)
 
 cwd = os.getcwd()
 
-f = open(cwd + '/file.txt','w+')
+f = open(cwd + 'Scripts/file.txt','w+')
 f.write(str(os.getpid()))
 f.close()
 first = True
+
+print str(argv[1]) + ' ' + str(argv[2])
+
 
 while True:
 	if first: #maybe use this for app notification?

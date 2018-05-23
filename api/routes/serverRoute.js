@@ -25,4 +25,7 @@ module.exports = function(app) {
 
   app.route('/password')
     .post(camera.newPassword);
+
+  app.route('/verify')
+    .get(camera.verifyPassword);
 };

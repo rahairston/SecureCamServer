@@ -20,4 +20,5 @@ fil = directory + today + '.jpg'
 
 camera.capture(fil)
 
+#moving new image into the "session" folder
 os.system('cp ' + fil + ' ' + str(argv[2]))
