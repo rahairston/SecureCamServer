@@ -9,11 +9,9 @@
   },
   "author": "ryan hairston",
   "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.14.12"
-  },
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "nodemon": "^1.17.5"
   }
 }

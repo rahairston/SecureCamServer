@@ -34,13 +34,10 @@ if [ ! -f $STARTUP ]; then
     echo "cd /etc/init.d" >> $STARTUP
 fi
 
-echo "Installing picamera"
-echo ""
-#install picamera
-
 echo "installing npm and it's dependencies"
 echo ""
-apt-get install nodejs #verify with wifi
+curl -sL https://deb.nodesource.com/setup_8.x | sudo bash - &>/dev/null
+apt-get -y install nodejs
 npm i
 
 echo "The default password is 'password'"
