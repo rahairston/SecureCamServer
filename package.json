@@ -2,9 +2,9 @@
   "name": "server",
   "version": "1.0.0",
   "description": "REST API test",
-  "repository" : { 
-    "type" : "git", 
-    "url" : "https://github.com/rahairston/SecureCamServer.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rahairston/SecureCamServer.git"
   },
   "main": "index.js",
   "scripts": {
