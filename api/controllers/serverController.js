@@ -265,5 +265,10 @@ exports.newPassword = function(req, res) {
  * @param {*} res 
  */
 exports.verifyPassword = function(req, res) {
-
+  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
+    res.sendStatus(HTTP_UNAUTHORIZED);
+    return;
+  } else {
+    res.send('ok');
+  }
 }
