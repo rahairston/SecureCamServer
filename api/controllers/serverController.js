@@ -261,6 +261,7 @@ exports.newPassword = function(req, res) {
  * way we can get the password before any other calls.
  * This also let's us store the password on the client
  * and attach it to all future calls
+ * Returns if the camera is on or off by seeing if th eprocess file exists
  * @param {*} req 
  * @param {*} res 
  */
@@ -269,6 +270,7 @@ exports.verifyPassword = function(req, res) {
     res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   } else {
-    res.send('ok');
+    var onorOff = fs.exists(path.join(process.cwd(), 'Scripts', 'file.txt'));
+    res.send(onorOff);
   }
 }
