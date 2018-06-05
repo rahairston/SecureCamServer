@@ -35,6 +35,10 @@ function getFolders(folders) {
   });
 }
 
+exports.test = function(req, res) {
+  res.send('success');
+};
+
 /**
  * Turns on the camera by executing the python script
  * that infinitely loops to look for motion that takes 
@@ -172,7 +176,7 @@ exports.getPictures = function(req, res) {
     return;
   }
 
-  var folders = fs.readdirSync(picturePath);
+  var folders = fs.readdirSync(picturesPath);
 
   getFolders(folders).then(function(array) {
     var data = {
@@ -270,7 +274,6 @@ exports.verifyPassword = function(req, res) {
     res.sendStatus(HTTP_UNAUTHORIZED);
     return;
   } else {
-    var onorOff = fs.exists(path.join(process.cwd(), 'Scripts', 'file.txt'));
-    res.send(onorOff);
+    res.send(fs.existsSync(path.join(process.cwd(), 'Scripts', 'file.txt')));
   }
 }

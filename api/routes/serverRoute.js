@@ -5,6 +5,9 @@ module.exports = function(app) {
   var camera = require(controllerPath);
 
   // Routes
+  app.route('/')
+    .get(camera.test);
+
   app.route('/on')
   	.post(camera.turnOn);
 
