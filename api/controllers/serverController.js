@@ -84,8 +84,7 @@ exports.turnOn = function(req, res) {
   });
 
   var data = {
-    session: session,
-    folder: folder
+    folder: dateString
   };
 
   res.send(data);
