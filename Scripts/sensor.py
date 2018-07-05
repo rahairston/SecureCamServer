@@ -12,7 +12,7 @@ GPIO.setup(11,GPIO.IN)
 
 cwd = os.getcwd()
 
-f = open(cwd + 'Scripts/file.txt','w+')
+f = open(cwd + '/Scripts/file.txt','w')
 f.write(str(os.getpid()))
 f.close()
 first = True
@@ -22,5 +22,5 @@ while True:
 		first = False
 	i=GPIO.input(11)
 	if i==1:
-		os.system('python ' + os.getcwd() + '/camera.py ' + str(argv[1]) + ' ' + str(argv[2]))
+		os.system('python ' + os.getcwd() + '/Scripts/camera.py ' + str(argv[1]) + ' ' + str(argv[2]))
 		time.sleep(5)

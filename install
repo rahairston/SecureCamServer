@@ -54,3 +54,5 @@ echo "You can change this with the '/password' route,"
 echo "Using the client application 'Change Password' functionality,"
 echo "or by running a sha256 hash on a password of your choice then copying into 'config.js'"
 echo ""
+
+rm install
