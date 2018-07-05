@@ -17,9 +17,6 @@ f.write(str(os.getpid()))
 f.close()
 first = True
 
-print str(argv[1]) + ' ' + str(argv[2])
-
-
 while True:
 	if first: #maybe use this for app notification?
 		first = False

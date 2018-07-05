@@ -10,6 +10,7 @@ echo "INSTALLING..."
 echo "Making Pictures Folder"
 echo ""
 mkdir Pictures
+chown $USER Pictures
 
 STARTUPDIR="/etc/init.d/"
 STARTUP="/etc/init.d/camera_autostart"
