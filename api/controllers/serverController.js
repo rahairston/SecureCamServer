@@ -276,3 +276,7 @@ exports.verifyPassword = function(req, res) {
     res.send(fs.existsSync(path.join(process.cwd(), 'Scripts', 'file.txt')));
   }
 }
+
+exports.snapshot = function(req, res) {
+   res.send('click');
+}

@@ -31,4 +31,7 @@ module.exports = function(app) {
 
   app.route('/verify')
     .get(camera.verifyPassword);
+
+  app.route('/snapshot')
+    .post(camera.snapshot);
 };
