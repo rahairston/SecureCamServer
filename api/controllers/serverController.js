@@ -25,9 +25,12 @@ function getFolders(folders) {
 
     for(var i in folders) {
       var folder = folders[i];
-      var pictures = fs.readdirSync(path.join(picturesPath, folder));
-      for(var j in pictures) {
-        arr.push(path.join(folder, pictures[j]));
+      //check if it's a folder in case of our "snapshot" image
+      if (fs.lstatSync(`${picturesPath}/${folder}`).isDirectory()) {
+        var pictures = fs.readdirSync(path.join(picturesPath, folder));
+        for(var j in pictures) {
+          arr.push(path.join(folder, pictures[j]));
+        }
       }
     }
 
@@ -277,6 +280,24 @@ exports.verifyPassword = function(req, res) {
   }
 }
 
+/**
+ * Used to take a single snapshot image on request
+ * @param {*} req 
+ * @param {*} res 
+ */
 exports.snapshot = function(req, res) {
-   res.send('click');
+  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
+    res.sendStatus(HTTP_UNAUTHORIZED);
+    return;
+  } else {
+    //execute the python script that makes the camera take a picture
+    exec(`python ${process.cwd()}/Scripts/camera.py ${picturesPath}/ `, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    });
+
+    res.sendFile('snapshot.jpg', {root: picturesPath});
+  }
 }
