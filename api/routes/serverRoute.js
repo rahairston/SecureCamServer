@@ -16,7 +16,7 @@ module.exports = function(app) {
 
   app.route('/picture')
     .get(camera.getPicture);
-  
+
   app.route('/pictures')
     .get(camera.getPictures);
 
@@ -33,5 +33,5 @@ module.exports = function(app) {
     .get(camera.verifyPassword);
 
   app.route('/snapshot')
-    .post(camera.snapshot);
+    .get(camera.snapshot);
 };
