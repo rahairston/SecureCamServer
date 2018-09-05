@@ -297,7 +297,6 @@ exports.snapshot = function(req, res) {
         return;
       }
     });
-
     res.sendFile('snapshot.jpg', {root: picturesPath});
   }
 }
