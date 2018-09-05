@@ -1,6 +1,7 @@
 'use strict';
 var fs = require('fs'); //file-system handling
-const { exec } = require('child_process'); //running the matlab algorithm
+const { execSync } = require('child_process');
+const { exec } = require('child_process');
 const path = require('path'); //OS independent pathing... not that it matters snce we're on a pi
 var crypto = require('crypto')
 var configPath = path.join(process.cwd(),'config');
@@ -116,7 +117,7 @@ exports.turnOff = function(req, res) {
   if (fs.existsSync(file)) {    
     var pid = fs.readFileSync(file)
     if (pid !== undefined || pid !== null) {
-      exec(`kill ${pid}`, (err, stdout, stderr) => {
+      execSync(`kill ${pid}`, (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
@@ -129,7 +130,7 @@ exports.turnOff = function(req, res) {
   var sessionPath = path.join(picturesPath, 'Session');
 
   //removing the session folder and it's contents (if no session, then rm -rf does nothing)
-  exec(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
+  execSync(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return;
@@ -291,7 +292,7 @@ exports.snapshot = function(req, res) {
     return;
   } else {
     //execute the python script that makes the camera take a picture
-    exec(`python ${process.cwd()}/Scripts/camera.py ${picturesPath}/ `, (err, stdout, stderr) => {
+    execSync(`python ${process.cwd()}/Scripts/camera.py ${picturesPath}/`, (err, stdout, stderr) => {
       if (err) {
         console.error(err);
         return;
