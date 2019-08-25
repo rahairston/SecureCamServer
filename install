@@ -49,10 +49,12 @@ curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
 apt-get -y install nodejs
 npm i
 
+echo "The default username is 'username'"
 echo "The default password is 'password'"
 echo "You can change this with the '/password' route,"
 echo "Using the client application 'Change Password' functionality,"
 echo "or by running a sha256 hash on a password of your choice then copying into 'config.js'"
+echo "both exports.username and exports.password"
 echo ""
 
 rm install

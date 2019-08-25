@@ -5,9 +5,6 @@ module.exports = function(app) {
   var camera = require(controllerPath);
 
   // Routes
-  app.route('/')
-    .get(camera.test);
-
   app.route('/on')
   	.post(camera.turnOn);
 
@@ -29,8 +26,8 @@ module.exports = function(app) {
   app.route('/password')
     .post(camera.newPassword);
 
-  app.route('/verify')
-    .get(camera.verifyPassword);
+  app.route('/login')
+    .get(camera.login);
 
   app.route('/snapshot')
     .post(camera.snapshot);

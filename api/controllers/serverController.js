@@ -1,15 +1,14 @@
 'use strict';
-var fs = require('fs'); //file-system handling
+const fs = require('fs'); //file-system handling
 const { exec } = require('child_process'); //running the matlab algorithm
 const path = require('path'); //OS independent pathing... not that it matters snce we're on a pi
-var crypto = require('crypto')
-var configPath = path.join(process.cwd(),'config');
+const crypto = require('crypto');
+const configPath = path.join(process.cwd(),'config');
 const picturesPath = path.join(process.cwd(), 'Pictures')
-const password = require(configPath);
+let password = require(configPath);
 
 //HTTP status codes (other than default 200)
 const HTTP_NO_CONTENT = 204
-const HTTP_UNAUTHORIZED = 401
 const HTTP_FILE_NOT_FOUND = 404
 
 /**
@@ -20,15 +19,15 @@ const HTTP_FILE_NOT_FOUND = 404
  * @return Promise resolving an array of strings containing folders/files in the Pictures folder 
  */
 function getFolders(folders) {
-  return new Promise(function(resolve, reject) {
-    var arr = [];
+  return new Promise((resolve, reject) => {
+    let arr = [];
 
-    for(var i in folders) {
-      var folder = folders[i];
+    for(let i in folders) {
+      const folder = folders[i];
       //check if it's a folder in case of our "snapshot" image
       if (fs.lstatSync(`${picturesPath}/${folder}`).isDirectory()) {
-        var pictures = fs.readdirSync(path.join(picturesPath, folder));
-        for(var j in pictures) {
+        const pictures = fs.readdirSync(path.join(picturesPath, folder));
+        for(let j in pictures) {
           arr.push(path.join(folder, pictures[j]));
         }
       }
@@ -37,10 +36,6 @@ function getFolders(folders) {
     resolve(arr);
   });
 }
-
-exports.test = function(req, res) {
-  res.send('success');
-};
 
 /**
  * Turns on the camera by executing the python script
@@ -52,15 +47,10 @@ exports.test = function(req, res) {
  * @return the daily and session folders
  */
 exports.turnOn = function(req, res) {
-  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
-
-  var today = new Date();
-  var dateString = `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`;
-  var folder = path.join(picturesPath, dateString); //daily folder
-  var session = path.join(picturesPath, 'Session'); // session folder
+  const today = new Date();
+  const dateString = `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`;
+  const folder = path.join(picturesPath, dateString); //daily folder
+  const session = path.join(picturesPath, 'Session'); // session folder
 
   //make dialy folder if one doesn't exist
   if (!fs.existsSync(folder)) {
@@ -68,12 +58,12 @@ exports.turnOn = function(req, res) {
   }
 
   /* always make a session folder (but still do a check because... uh...)
-   * session folder is each time the camera is turned on, that way
-   * We can distinguish from old photos. On client we will NOT do double
-   * requests. We will just do a duaity check there (i.e., if session, don't request,
-   * but if the requested picture from the date folde ris a session, we'll put it under
-   * the session section) -- note for when working on client)
-   */
+    * session folder is each time the camera is turned on, that way
+    * We can distinguish from old photos. On client we will NOT do double
+    * requests. We will just do a duaity check there (i.e., if session, don't request,
+    * but if the requested picture from the date folder is a session, we'll put it under
+    * the session section) -- note for when working on client)
+    */
   if (!fs.existsSync(session)) {
     fs.mkdirSync(session);
   }
@@ -86,7 +76,7 @@ exports.turnOn = function(req, res) {
     }
   });
 
-  var data = {
+  const data = {
     folder: dateString
   };
 
@@ -105,16 +95,11 @@ exports.turnOn = function(req, res) {
  * @param {*} res 
  */
 exports.turnOff = function(req, res) {
-  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
-
   //file with the pid of our infinite loop
-  var file = path.join(process.cwd(), 'Scripts', 'file.txt')
+  const file = path.join(process.cwd(), 'Scripts', 'file.txt')
 
   if (fs.existsSync(file)) {    
-    var pid = fs.readFileSync(file)
+    const pid = fs.readFileSync(file)
     if (pid !== undefined || pid !== null) {
       exec(`kill ${pid}`, (err, stdout, stderr) => {
         if (err) {
@@ -126,7 +111,7 @@ exports.turnOff = function(req, res) {
 
     fs.unlinkSync(file);
   }
-  var sessionPath = path.join(picturesPath, 'Session');
+  const sessionPath = path.join(picturesPath, 'Session');
 
   //removing the session folder and it's contents (if no session, then rm -rf does nothing)
   exec(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
@@ -150,11 +135,6 @@ exports.turnOff = function(req, res) {
  * @param {*} res 
  */
 exports.getPicture = function(req, res) {
-  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
-
   //Send file doesn't allow relative paths BUT still check just in case
   if (!fs.existsSync(path.join(picturesPath, req.headers.picture)) || req.headers.picture.includes('..')) {
     res.status(HTTP_FILE_NOT_FOUND).send('File not found')
@@ -173,15 +153,10 @@ exports.getPicture = function(req, res) {
  * @return list of folders and files in thos folders
  */
 exports.getPictures = function(req, res) {
-  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
+  const folders = fs.readdirSync(picturesPath);
 
-  var folders = fs.readdirSync(picturesPath);
-
-  getFolders(folders).then(function(array) {
-    var data = {
+  getFolders(folders).then(array => {
+    let data = {
       pictures: array
     };
     
@@ -195,22 +170,17 @@ exports.getPictures = function(req, res) {
  * Pictures sub-folders
  * @param {*} req contains password AND picture to delete
  * @param {*} res 
- * @return 'Deleted' even if nothing was deleted
+ * @return 'No content' even if nothing was deleted
  */
 exports.deletePictures = function(req, res) {
-  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
+    const imgPath = path.join(picturesPath, req.body.picture);
 
-  var imgPath = path.join(picturesPath, req.body.picture);
-
-  //Check if includes picture path to prevent removing files outside of Pictures
-  if (fs.existsSync(imgPath) && imgPath.includes(picturesPath)) {
-    fs.unlinkSync(imgPath);
-  }
-
-  res.send('Deleted')
+    //Check if includes picture path to prevent removing files outside of Pictures
+    if (fs.existsSync(imgPath) && imgPath.includes(picturesPath)) {
+      fs.unlinkSync(imgPath);
+    }
+  
+    res.sendStatus(HTTP_NO_CONTENT);
 };
 
 /**
@@ -223,15 +193,10 @@ exports.deletePictures = function(req, res) {
  * @return verification if the motion detector has been tripped or not
  */
 exports.notifications = function(req, res) {
-  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
-
-  var sessionPath = path.join(picturesPath, 'Session');
+  const sessionPath = path.join(picturesPath, 'Session');
 
   if (fs.existsSync(sessionPath)) {
-    var array = fs.readdirSync(sessionPath)
+    const array = fs.readdirSync(sessionPath)
 
     if (array === undefined || array.length === 0) {
       res.send('No')
@@ -250,16 +215,12 @@ exports.notifications = function(req, res) {
  * @param {*} res 
  */
 exports.newPassword = function(req, res) {
-  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  }
-
-  var newPass = crypto.createHash('sha256').update(req.body.newPassword).digest('hex');
-  var file = path.join(process.cwd(), 'config.js')
+  const newUser = crypto.createHash('sha256').update(req.body.username).digest('hex');
+  const newPass = crypto.createHash('sha256').update(req.body.password).digest('hex');
+  const file = path.join(process.cwd(), 'config.js')
   fs.unlinkSync(file); //delete the file then overwrite it
-  fs.appendFileSync(file, `'use strict'\nexports.password='${newPass}'`);
-  res.sendStatus(HTTP_NO_CONTENT)
+  fs.appendFileSync(file, `'use strict'\nexports.username='${newUser}'\nexports.password='${newPass}'`);
+  res.sendStatus(HTTP_NO_CONTENT);
 }
 
 /**
@@ -271,13 +232,8 @@ exports.newPassword = function(req, res) {
  * @param {*} req 
  * @param {*} res 
  */
-exports.verifyPassword = function(req, res) {
-  if (crypto.createHash('sha256').update(req.headers.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  } else {
-    res.send(fs.existsSync(path.join(process.cwd(), 'Scripts', 'file.txt')));
-  }
+exports.login = function(req, res) {
+  res.send(fs.existsSync(path.join(process.cwd(), 'Scripts', 'file.txt')));
 }
 
 /**
@@ -286,18 +242,13 @@ exports.verifyPassword = function(req, res) {
  * @param {*} res 
  */
 exports.snapshot = function(req, res) {
-  if (crypto.createHash('sha256').update(req.body.password).digest('hex') !== password.password) {
-    res.sendStatus(HTTP_UNAUTHORIZED);
-    return;
-  } else {
-    //execute the python script that makes the camera take a picture
-    exec(`python ${process.cwd()}/Scripts/camera.py ${picturesPath}/ `, (err, stdout, stderr) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-    });
+  //execute the python script that makes the camera take a picture
+  exec(`python ${process.cwd()}/Scripts/camera.py ${picturesPath}/ `, (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+  });
 
-    res.sendFile('snapshot.jpg', {root: picturesPath});
-  }
+  res.sendFile('snapshot.jpg', {root: picturesPath});
 }
