@@ -1,14 +1,14 @@
-#import picamera
+import picamera
 
 import os
 import time
 
 from datetime import datetime
 from sys import argv
-#argv1 is date-time folder
+#argv1 is date-time folder OR pictures folder
 #argv2 is session folder (we copy it into)
 
-#camera = picamera.PiCamera()
+camera = picamera.PiCamera()
 
 if len(argv) > 2 : #standard sensor based photo taking
     dt = datetime.today()
@@ -25,5 +25,5 @@ if len(argv) > 2 : #standard sensor based photo taking
     os.system('cp ' + fil + ' ' + str(argv[2]))
 
 elif len(argv) > 1 : #snapshot picture taking
-    fil = str(argv[1]) + '/snapshot.jpg'
-    print fil
+    fil = str(argv[1]) + 'snapshot.jpg'
+    camera.capture(fil)

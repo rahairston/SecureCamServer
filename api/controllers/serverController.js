@@ -16,7 +16,7 @@ const HTTP_FILE_NOT_FOUND = 404
  * and files in the Pictures folder as an
  * array in the format 'folder/img'
  * @param folders list of folders in the picturesPath folder
- * @return Promise resolving an array of strings containing folders/files in the Pictures folder 
+ * @return Promise resolving an array of strings containing folders/files in the Pictures folder
  */
 function getFolders(folders) {
   return new Promise((resolve, reject) => {
@@ -39,11 +39,11 @@ function getFolders(folders) {
 
 /**
  * Turns on the camera by executing the python script
- * that infinitely loops to look for motion that takes 
+ * that infinitely loops to look for motion that takes
  * pictures when motion is detected. Passes both daily
  * AND session folders as parameters to the python script
  * @param {*} req contains password
- * @param {*} res 
+ * @param {*} res
  * @return the daily and session folders
  */
 exports.turnOn = function(req, res) {
@@ -92,7 +92,7 @@ exports.turnOn = function(req, res) {
  * contents since it is a copy of all pictures taken
  * during the 'on' phase
  * @param {*} req contains password
- * @param {*} res 
+ * @param {*} res
  */
 exports.turnOff = function(req, res) {
   //file with the pid of our infinite loop
@@ -101,7 +101,7 @@ exports.turnOff = function(req, res) {
   if (fs.existsSync(file)) {    
     const pid = fs.readFileSync(file)
     if (pid !== undefined || pid !== null) {
-      exec(`kill ${pid}`, (err, stdout, stderr) => {
+      execSync(`kill ${pid}`, (err, stdout, stderr) => {
         if (err) {
           console.error(err);
           return;
@@ -114,7 +114,7 @@ exports.turnOff = function(req, res) {
   const sessionPath = path.join(picturesPath, 'Session');
 
   //removing the session folder and it's contents (if no session, then rm -rf does nothing)
-  exec(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
+  execSync(`rm -rf ${sessionPath}`, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return;
@@ -127,12 +127,12 @@ exports.turnOff = function(req, res) {
 /**
  * Gets an individual picture by name
  * Will be recieved in headers as FOLDER/'img'.jpg
- * This exists because NodeJS isn't good at 
- * sending multiple files at a time 
+ * This exists because NodeJS isn't good at
+ * sending multiple files at a time
  * FUTURE PLANS
  * maybe switch to zip and request folder/send a folder at a time?
  * @param {*} req contains password AND picture to GET
- * @param {*} res 
+ * @param {*} res
  */
 exports.getPicture = function(req, res) {
   //Send file doesn't allow relative paths BUT still check just in case
@@ -149,7 +149,7 @@ exports.getPicture = function(req, res) {
  * Calls the getFolders promise function so we get all folders
  * before we send them back.
  * @param {*} req contains password
- * @param {*} res 
+ * @param {*} res
  * @return list of folders and files in thos folders
  */
 exports.getPictures = function(req, res) {
@@ -159,7 +159,7 @@ exports.getPictures = function(req, res) {
     let data = {
       pictures: array
     };
-    
+
     res.send(data);
   });
 };
@@ -189,7 +189,7 @@ exports.deletePictures = function(req, res) {
  * if a picture has been taken (i.e. motion detector
  * has been set off)
  * @param {*} req password
- * @param {*} res 
+ * @param {*} res
  * @return verification if the motion detector has been tripped or not
  */
 exports.notifications = function(req, res) {
@@ -212,7 +212,7 @@ exports.notifications = function(req, res) {
  * Changing password for the server to turn on
  * Changes the hash in the config file as well
  * @param {*} req contains old and new passwords
- * @param {*} res 
+ * @param {*} res
  */
 exports.newPassword = function(req, res) {
   const newUser = crypto.createHash('sha256').update(req.body.username).digest('hex');
@@ -229,8 +229,8 @@ exports.newPassword = function(req, res) {
  * This also let's us store the password on the client
  * and attach it to all future calls
  * Returns if the camera is on or off by seeing if th eprocess file exists
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  */
 exports.login = function(req, res) {
   res.send(fs.existsSync(path.join(process.cwd(), 'Scripts', 'file.txt')));
@@ -238,8 +238,8 @@ exports.login = function(req, res) {
 
 /**
  * Used to take a single snapshot image on request
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  */
 exports.snapshot = function(req, res) {
   //execute the python script that makes the camera take a picture
