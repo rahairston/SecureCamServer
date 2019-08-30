@@ -5,6 +5,7 @@ const configPath = path.join(process.cwd(),'config');
 const config = require(configPath);
 
 function authorization(username, password) {
+  console.log(username, password)
   const userMatches = basicAuth.safeCompare(crypto.createHash('sha256').update(username).digest('hex'), config.username)
   const passwordMatches = basicAuth.safeCompare(crypto.createHash('sha256').update(password).digest('hex'), config.password)
 

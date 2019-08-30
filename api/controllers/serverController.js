@@ -46,7 +46,7 @@ function getFolders(folders) {
  * @param {*} res
  * @return the daily and session folders
  */
-exports.turnOn = function(req, res) {
+function turnOn(req, res) {
   const today = new Date();
   const dateString = `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`;
   const folder = path.join(picturesPath, dateString); //daily folder
@@ -94,7 +94,7 @@ exports.turnOn = function(req, res) {
  * @param {*} req contains password
  * @param {*} res
  */
-exports.turnOff = function(req, res) {
+function turnOff(req, res) {
   //file with the pid of our infinite loop
   const file = path.join(process.cwd(), 'Scripts', 'file.txt')
 
@@ -123,6 +123,14 @@ exports.turnOff = function(req, res) {
 
   res.send('Successfully turned off');
 };
+
+exports.turnOnOrOff = function(req, res) {
+  if (req.body.action === 'on') {
+    turnOn(req, res);
+  } else {
+    turnOff(req, res);
+  }
+}
 
 /**
  * Gets an individual picture by name
