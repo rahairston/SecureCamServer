@@ -144,12 +144,12 @@ exports.turnOnOrOff = function(req, res) {
  */
 exports.getPicture = function(req, res) {
   //Send file doesn't allow relative paths BUT still check just in case
-  if (!fs.existsSync(path.join(picturesPath, req.headers.picture)) || req.headers.picture.includes('..')) {
+  if (!fs.existsSync(path.join(picturesPath, req.params.picture)) || req.params.picture.includes('..')) {
     res.status(HTTP_FILE_NOT_FOUND).send('File not found')
     return
   }
 
-  res.sendFile(req.headers.picture, {root: picturesPath})
+  res.sendFile(req.params.picture, {root: picturesPath})
 }
 
 /**

@@ -8,7 +8,7 @@ module.exports = function(app) {
   app.route('/camera')
   	.post(camera.turnOnOrOff);
 
-  app.route('/picture')
+  app.route('/picture/:picture')
     .get(camera.getPicture);
 
   app.route('/pictures')
